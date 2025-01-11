@@ -36,7 +36,7 @@ function Skill() {
                 damping: 10,
               }}
               viewport={{ once: true }}
-              className="font-serif lg:text-4xl text-3xl text-[#CBA35C]"
+              className="font-serif lg:text-4xl text-3xl text-[#CBA35C] overline"
             >
               Skill
             </motion.div>
