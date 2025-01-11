@@ -86,7 +86,7 @@ function Resume() {
                       viewport={{ amount: 0.1, once: true }}
                       className="bg-[#CBA35C] text-white p-2 rounded-lg shadow-md"
                     >
-                      Download CV | <IoMdDownload className="text-lg text-white inline" />
+                      Download CV
                     </motion.button>
                   </a>
                 )}
