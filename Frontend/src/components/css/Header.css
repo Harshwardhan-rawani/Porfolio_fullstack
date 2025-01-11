@@ -1,0 +1,7 @@
+.animatenav{
+    animation: nav 5s linear  both forwards;
+}
+@keyframes nav {
+    from {transform: translateY(-100%); opacity: 0;}
+    to { transform: translateY(0); opacity: 1;}
+}
