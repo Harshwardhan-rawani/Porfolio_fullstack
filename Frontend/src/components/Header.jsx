@@ -68,9 +68,9 @@ function Header() {
       
         <div className={`lg:hidden w-screen fixed  ${show ? "mt-2":"mt-14"} transition-all duration-200 ease-in ${mobileMenuOpen?"translate-y-9 opacity-100":" -translate-y-full opacity-0"}  left-0 w-full flex flex-col z-40 animatenav`}>
 
-          <ul className={`bg-[#fff] rounded-b-lg  px-8 py-3 shadow-md w-[90vw] mx-auto ${show?"border-t-0":"border-t-2"}`}>
+          <ul className={`bg-[#fff] rounded-b-lg px-8  py-3 shadow-md w-[90vw] mx-auto ${show?"border-t-0":"border-t-2"}`}>
           <Link className='hover:text-[#FCC737] text-[#CBA35C] hover:overline cursor-pointer' smooth={true} duration={300} to="home"><li className="text-lg font-serif">Home</li></Link>  
-          <Link className='hover:text-[#FCC737] text-[#CBA35C] hover:overline cursor-pointer' smooth={true} duration={300} to="about"><li className="text-lg font-serif">About</li></Link>
+          <Link className='hover:text-[#FCC737]  text-[#CBA35C] hover:overline cursor-pointer' smooth={true} duration={300} to="about"><li className="text-lg font-serif">About</li></Link>
           <Link className='hover:text-[#FCC737] text-[#CBA35C] hover:overline cursor-pointer' smooth={true} duration={300} to="service"> <li className="text-lg font-serif">Skills</li></Link>
           <Link className='hover:text-[#FCC737] text-[#CBA35C] hover:overline cursor-pointer' smooth={true} duration={300} to="resume"><li className="text-lg font-serif">Resume</li></Link>
           <Link className='hover:text-[#FCC737] text-[#CBA35C] hover:overline cursor-pointer' smooth={true} duration={300} to="project"><li className="text-lg font-serif">Projects</li></Link>

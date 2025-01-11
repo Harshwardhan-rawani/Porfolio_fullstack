@@ -16,6 +16,10 @@ const projectSchema = new mongoose.Schema(
         message: 'Invalid project link format!',
       },
     },
+    type: {
+      type: String,
+      required: true,
+    },
     image: {
       type: String, // Store the image URL or file path
     },

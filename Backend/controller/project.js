@@ -5,10 +5,10 @@ const path = require('path');
 // Add a new project
 exports.addProject = async (req, res) => {
   try {
-    const { name, projectLink } = req.body;
+    const { name, projectLink,type } = req.body;
     const image = req.file ? req.file.path : null;
 
-    const newProject = new Project({ name, projectLink, image });
+    const newProject = new Project({ name, projectLink,type, image });
     await newProject.save();
     res.status(200).json(newProject);
   } catch (error) {
@@ -30,7 +30,7 @@ exports.getProjects = async (req, res) => {
 exports.updateProject = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, projectLink } = req.body;
+    const { name, projectLink,type } = req.body;
     const image = req.file ? req.file.path : null;
 
     // Find the existing project
@@ -46,7 +46,7 @@ exports.updateProject = async (req, res) => {
     }
 
     // Prepare updated data
-    const updatedData = { name, projectLink };
+    const updatedData = { name, projectLink,type };
     if (image) updatedData.image = image;
 
     // Update the project

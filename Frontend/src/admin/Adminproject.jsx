@@ -11,6 +11,7 @@ function Adminproject() {
     name: '',
     projectLink: '',
     image: null,
+    type: 'Frontend',  // Add 'type' field to form data
   });
   const [projects, setProjects] = useState([]);
   const [editId, setEditId] = useState(null); // Track ID for editing
@@ -52,6 +53,7 @@ function Adminproject() {
     const formToSend = new FormData();
     formToSend.append('name', formData.name);
     formToSend.append('projectLink', formData.projectLink);
+    formToSend.append('type', formData.type); // Include 'type' in form data
     if (formData.image) formToSend.append('image', formData.image);
 
     try {
@@ -78,7 +80,7 @@ function Adminproject() {
       }
 
       // Reset form
-      setFormData({ name: '', projectLink: '', image: null });
+      setFormData({ name: '', projectLink: '', image: null, type: 'Frontend' }); // Reset type to default value
       if (fileInputRef.current) {
         fileInputRef.current.value = ''; // Reset file input
       }
@@ -92,7 +94,7 @@ function Adminproject() {
   // Handle Edit Project
   const handleEdit = (id) => {
     const projectToEdit = projects.find(project => project._id === id);
-    setFormData({ name: projectToEdit.name, projectLink: projectToEdit.projectLink, image: null });
+    setFormData({ name: projectToEdit.name, projectLink: projectToEdit.projectLink, image: null, type: projectToEdit.type });
     setEditId(id);
     if (fileInputRef.current) {
       fileInputRef.current.value = ''; // Reset file input
@@ -112,9 +114,7 @@ function Adminproject() {
 
   return (
     <>
-  
       <div className='grid lg:grid-cols-2 grid-cols-1 h-full bg-white'>
-        
         <div className='w-full mt-10 lg:px-20 px-10 border-r-2 shadow-inner'>
           <div className="w-full p-10 bg-white">
             <h2 className="text-3xl font-bold mb-4">{editId ? 'Edit Project' : 'Add Project'}</h2>
@@ -145,6 +145,22 @@ function Adminproject() {
                   className="mt-1 p-1 w-full border-b-2 border-gray-300 focus:outline-none focus:border-teal-500"
                   required
                 />
+              </div>
+
+              {/* Project Type Dropdown */}
+              <div className="mb-4">
+                <label htmlFor="type" className="block mb-2 text-sm font-medium text-gray-900">Select Project Type</label>
+                <select
+                  id="type"
+                  name="type"
+                  value={formData.type}
+                  onChange={handleChange}
+                  className="mt-1 p-1 w-full border-b-2 border-b-gray-300 focus:outline-none focus:border-teal-500"
+                  required
+                >
+                  <option value="Frontend">Frontend</option>
+                  <option value="Fullstack">Fullstack</option>
+                </select>
               </div>
 
               {/* Image Upload Field */}
@@ -202,6 +218,7 @@ function Adminproject() {
                   <th scope="col" className="px-6 py-3">Image</th>
                   <th scope="col" className="px-6 py-3">Project Name</th>
                   <th scope="col" className="px-6 py-3">Project Link</th>
+                  <th scope="col" className="px-6 py-3">Type</th>
                   <th scope="col" className="px-6 py-3">Action</th>
                 </tr>
               </thead>
@@ -231,6 +248,9 @@ function Adminproject() {
                         {project.projectLink}
                       </a>
                     </td>
+
+                    {/* Type */}
+                    <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white">{project.type}</td>
 
                     {/* Actions */}
                     <td className="px-6 py-4 flex space-x-1">
