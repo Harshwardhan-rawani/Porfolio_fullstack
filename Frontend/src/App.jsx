@@ -67,7 +67,7 @@ function App() {
             </Element>
           </>
         } />
-        <Route path="/admin/login" element={<Adminlogin />} />
+        <Route path="/admin" element={<Adminlogin />} />
 
         {/* Protected Admin Routes */}
         <Route path="/admin/*" element={<PrivateRoute isAuthenticated={isAuthenticated} />}>
