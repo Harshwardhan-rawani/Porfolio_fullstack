@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, Outlet } from 'react-router-dom';
-
+import { FaHome } from "react-icons/fa";
 function AdminLayout() {
   const handleLoginClick = () => {
     localStorage.removeItem("token")
@@ -14,6 +14,8 @@ function AdminLayout() {
         <Link to={"./dashboard"} className="lg:text-2xl font- md:text-2xl text-xl font-semibold text-white tracking-wide">
           Admin Panel
         </Link>
+       <div className='flex space-x-4 items-center'>
+        <Link to={"/"}><FaHome className='text-white text-xl'/></Link>
         <button
           onClick={handleLoginClick}
           aria-label="Login"
@@ -21,6 +23,7 @@ function AdminLayout() {
         >
           Logout
         </button>
+       </div>
       </div>
 
       {/* Page Content */}
