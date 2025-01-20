@@ -1,27 +1,20 @@
 const express = require('express');
 const multer = require('multer');
-const path = require('path');
-const projectController = require('../controller/project'); // Adjust the path if needed
+const { addProject, getProjects, updateProject, deleteProject } = require('../controller/project');
 
 const router = express.Router();
 
-// Multer setup for handling image uploads
+// Multer configuration for file uploads
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Path to save the uploaded image
-  },
-  filename: (req, file, cb) => {
-    const fileName = Date.now() + path.extname(file.originalname);
-    cb(null, fileName);
-  },
+  destination: (req, file, cb) => cb(null, 'uploads/'),
+  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname),
 });
-
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
 // Routes
-router.post('/projects', upload.single('image'), projectController.addProject);
-router.get('/projects', projectController.getProjects);
-router.put('/projects/:id', upload.single('image'), projectController.updateProject);
-router.delete('/projects/:id', projectController.deleteProject);
+router.post('/projects', upload.single('image'), addProject);
+router.get('/projects', getProjects);
+router.put('/projects/:id', upload.single('image'), updateProject);
+router.delete('/projects/:id', deleteProject);
 
 module.exports = router;

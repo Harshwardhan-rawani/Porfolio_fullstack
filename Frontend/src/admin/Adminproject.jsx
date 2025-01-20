@@ -11,13 +11,12 @@ function Adminproject() {
     name: '',
     projectLink: '',
     image: null,
-    type: 'Frontend',  // Add 'type' field to form data
+    type: 'Frontend', // Add 'type' field to form data
   });
   const [projects, setProjects] = useState([]);
-  const [editId, setEditId] = useState(null); // Track ID for editing
-  const fileInputRef = useRef(null); // Ref for file input
+  const [editId, setEditId] = useState(null); 
+  const fileInputRef = useRef(null); 
 
-  // Fetch projects from the backend
   useEffect(() => {
     const fetchProjects = async () => {
       try {
@@ -25,6 +24,7 @@ function Adminproject() {
         setProjects(response.data);
       } catch (error) {
         console.error('Error fetching projects:', error);
+        toast.error('Error fetching projects');
       }
     };
     fetchProjects();
@@ -38,77 +38,74 @@ function Adminproject() {
       [name]: value,
     });
   };
-
-  // Handle image change
   const handleImageChange = (e) => {
-    setFormData({
-      ...formData,
-      image: e.target.files[0],
-    });
+    const file = e.target.files[0];
+    if (file) {
+      const previewURL = URL.createObjectURL(file); 
+      setFormData({
+        ...formData,
+        image: file,
+        imagePreview: previewURL, 
+      });
+    }
   };
+  
+  console.log(formData)
 
-  // Handle form submission (Add or Update project)
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formToSend = new FormData();
-    formToSend.append('name', formData.name);
-    formToSend.append('projectLink', formData.projectLink);
-    formToSend.append('type', formData.type); // Include 'type' in form data
-    if (formData.image) formToSend.append('image', formData.image);
-
     try {
       setLoading(true);
+     
+      
+      let response;
       if (editId) {
-        // Update existing project
-        const response = await axios.put(
+        response = await axios.put(
           `${import.meta.env.VITE_URL}/api/projects/${editId}`,
-          formToSend,
+          formData,
           { headers: { 'Content-Type': 'multipart/form-data' } }
         );
-
         setProjects(projects.map(project => (project._id === editId ? response.data : project)));
-        toast.success("Updated Successfully");
+        toast.success('Project updated successfully');
         setEditId(null);
       } else {
-        const response = await axios.post(
+        response = await axios.post(
           `${import.meta.env.VITE_URL}/api/projects`,
-          formToSend,
+          formData,
           { headers: { 'Content-Type': 'multipart/form-data' } }
         );
-        toast.success("Added Successfully");
+        toast.success('Project added successfully');
         setProjects([...projects, response.data]);
       }
-
-      // Reset form
-      setFormData({ name: '', projectLink: '', image: null, type: 'Frontend' }); // Reset type to default value
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''; // Reset file input
-      }
+      setFormData({ name: '', projectLink: '', image: null, type: 'Frontend' });
+      if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (error) {
       console.error('Error submitting form:', error);
+      toast.error('Error submitting form');
     } finally {
       setLoading(false);
     }
   };
-
+  
+  
   // Handle Edit Project
   const handleEdit = (id) => {
     const projectToEdit = projects.find(project => project._id === id);
     setFormData({ name: projectToEdit.name, projectLink: projectToEdit.projectLink, image: null, type: projectToEdit.type });
     setEditId(id);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''; // Reset file input
-    }
+    if (fileInputRef.current) fileInputRef.current.value = ''; // Reset file input
   };
 
   // Handle Delete Project
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${import.meta.env.VITE_URL}/api/projects/${id}`);
-      toast.error("Deleted Successfully");
+      toast.success("Project deleted successfully");
       setProjects(projects.filter(project => project._id !== id));
     } catch (error) {
       console.error('Error deleting project:', error);
+      toast.error('Error deleting project');
     }
   };
 
@@ -180,15 +177,16 @@ function Adminproject() {
                   ref={fileInputRef}
                   className="block w-full text-sm text-gray-900 border-b-2 border-gray-300 cursor-pointer focus:outline-none focus:border-teal-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                 />
-                {formData.image && (
-                  <div className="mt-2">
-                    <img 
-                      src={URL.createObjectURL(formData.image)} 
-                      alt="Preview" 
-                      className="w-32 h-32 object-cover rounded-md"
-                    />
-                  </div>
-                )}
+               {formData.imagePreview && (
+  <div className="mt-2">
+    <img
+      src={formData.imagePreview}
+      alt="Preview"
+      className="w-32 h-32 object-cover rounded-md"
+    />
+  </div>
+)}
+
               </div>
 
               {/* Submit Button */}
@@ -232,7 +230,7 @@ function Adminproject() {
                     <td className="px-6 py-4">
                       {project.image && (
                         <img
-                          src={`${import.meta.env.VITE_URL}/${project.image}`} // Adjust the path if needed
+                          src={project.image} // Cloudinary URL or base64
                           alt={project.name}
                           className="lg:w-16 lg:h-16 md:w-14 md:h-14 w-10 h-10 rounded-md object-cover"
                         />

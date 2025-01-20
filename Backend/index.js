@@ -4,7 +4,7 @@ const app = express();
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-
+const path = require("path")
 //routes
 const skillRoutes = require('./router/skill');
 const toolRoutes = require("./router/tool")
@@ -21,8 +21,7 @@ const aboutmodel = require("./model/about")
 // Middleware
 app.use(bodyParser.json());
 app.use(cors());
-app.use('/uploads', express.static('uploads')); // Serve uploaded images
-
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Routes
 app.use('/api', skillRoutes);
 app.use('/api', toolRoutes);

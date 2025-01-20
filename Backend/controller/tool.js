@@ -1,19 +1,31 @@
 const Tool = require('../model/tool');
-const fs = require('fs');
-const path = require('path');
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+});
 
 // Add a new tool
 exports.addTool = async (req, res) => {
+ console.log(req.body)
   try {
-    const { toolName } = req.body;
+    const { toolName, imageBase64 } = req.body;
 
-    const image = req.file ? req.file.path : null;
+    let image = null;
+    if (imageBase64) {
+      const result = await cloudinary.uploader.upload(imageBase64, {
+        folder: 'tools',
+      });
+      image = result.secure_url;
+    }
 
     const newTool = new Tool({ toolName, image });
     await newTool.save();
     res.status(200).json(newTool);
   } catch (error) {
-    res.status(500).json({ message: "Error adding tool", error });
+    res.status(500).json({ message: 'Error adding tool', error });
   }
 };
 
@@ -23,7 +35,7 @@ exports.getTools = async (req, res) => {
     const tools = await Tool.find();
     res.status(200).json(tools);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching tools", error });
+    res.status(500).json({ message: 'Error fetching tools', error });
   }
 };
 
@@ -31,31 +43,32 @@ exports.getTools = async (req, res) => {
 exports.updateTool = async (req, res) => {
   try {
     const { id } = req.params;
-    const { toolName } = req.body;
-    const image = req.file ? req.file.path : null;
+    const { toolName, imageBase64 } = req.body;
 
-    // Find the existing tool
     const existingTool = await Tool.findById(id);
-    if (!existingTool) return res.status(404).json({ message: "Tool not found" });
+    if (!existingTool) return res.status(404).json({ message: 'Tool not found' });
 
-    // Remove old image if a new one is provided
-    if (image && existingTool.image) {
-      const oldImagePath = path.join(__dirname, '..', existingTool.image);
-      if (fs.existsSync(oldImagePath)) {
-        fs.unlinkSync(oldImagePath); // Delete the old image file
+    let image = existingTool.image;
+    if (imageBase64) {
+      // Delete old image from Cloudinary
+      if (existingTool.image) {
+        const publicId = existingTool.image.split('/').pop().split('.')[0];
+        await cloudinary.uploader.destroy(`tools/${publicId}`);
       }
+
+      // Upload new image
+      const result = await cloudinary.uploader.upload(imageBase64, {
+        folder: 'tools',
+      });
+      image = result.secure_url;
     }
 
-    // Prepare updated data
-    const updatedData = { toolName };
-    if (image) updatedData.image = image;
-
-    // Update the tool
+    const updatedData = { toolName, image };
     const updatedTool = await Tool.findByIdAndUpdate(id, updatedData, { new: true });
 
     res.status(200).json(updatedTool);
   } catch (error) {
-    res.status(500).json({ message: "Error updating tool", error });
+    res.status(500).json({ message: 'Error updating tool', error });
   }
 };
 
@@ -64,29 +77,17 @@ exports.deleteTool = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Find the tool to get the image path
     const toolToDelete = await Tool.findById(id);
-    if (!toolToDelete) {
-      return res.status(404).json({ message: "Tool not found" });
-    }
+    if (!toolToDelete) return res.status(404).json({ message: 'Tool not found' });
 
-    // Remove the associated image file if it exists
     if (toolToDelete.image) {
-      const filePath = path.resolve(toolToDelete.image); // Get the absolute file path
-      fs.unlink(filePath, (err) => {
-        if (err) {
-          console.error(`Error deleting image file: ${err.message}`);
-        } else {
-          console.log(`Deleted image file: ${filePath}`);
-        }
-      });
+      const publicId = toolToDelete.image.split('/').pop().split('.')[0];
+      await cloudinary.uploader.destroy(`tools/${publicId}`);
     }
 
-    // Delete the tool from the database
     await Tool.findByIdAndDelete(id);
-
-    res.status(200).json({ message: "Tool deleted successfully" });
+    res.status(200).json({ message: 'Tool deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: "Error deleting tool", error });
+    res.status(500).json({ message: 'Error deleting tool', error });
   }
 };

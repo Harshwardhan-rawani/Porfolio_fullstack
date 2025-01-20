@@ -12,8 +12,8 @@ function Adminresume() {
     resume: null,
   });
   const [resumes, setResumes] = useState([]);
-  const [editId, setEditId] = useState(null); // Track ID for editing
-  const fileInputRef = useRef(null); // Ref for file input
+  const [editId, setEditId] = useState(null); 
+  const fileInputRef = useRef(null); 
 
   // Fetch resumes from the backend
   useEffect(() => {
@@ -38,13 +38,19 @@ function Adminresume() {
   };
 
   // Handle resume change
-  const handleFileChange = (e) => {
-    setFormData({
-      ...formData,
-      resume: e.target.files[0],
-    });
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setFormData({
+          ...formData,
+          imageBase64: reader.result,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
   };
-
   // Handle form submission (Add or Update resume)
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -143,7 +149,7 @@ function Adminresume() {
                   id="resume"
                   name="resume"
                   accept=".pdf,.doc,.docx"
-                  onChange={handleFileChange} // Handle the change
+                  onChange={handleImageChange} // Handle the change
                   ref={fileInputRef} // Add ref if needed
                   className="block w-full text-sm text-gray-900 border-b-2 border-gray-300 cursor-pointer focus:outline-none  focus:border-teal-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                 />

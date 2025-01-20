@@ -1,17 +1,32 @@
 const Project = require("../model/project");
-const fs = require('fs');
-const path = require('path');
+const cloudinary = require('cloudinary').v2;
 
-// Add a new project
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+});
+
+
 exports.addProject = async (req, res) => {
   try {
-    const { name, projectLink,type } = req.body;
-    const image = req.file ? req.file.path : null;
+  
+    const { name, projectLink, type } = req.body;
+    
+    let image = null;
 
-    const newProject = new Project({ name, projectLink,type, image });
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path,{ folder: 'projects',});
+      image = result.secure_url; 
+    }
+
+    const newProject = new Project({ name, projectLink, type, image });
     await newProject.save();
     res.status(200).json(newProject);
   } catch (error) {
+
+    console.log(error)
     res.status(500).json({ message: "Error adding project", error });
   }
 };
@@ -30,23 +45,28 @@ exports.getProjects = async (req, res) => {
 exports.updateProject = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, projectLink,type } = req.body;
-    const image = req.file ? req.file.path : null;
+    const { name, projectLink, type } = req.body;
+    let image = null;
 
     // Find the existing project
     const existingProject = await Project.findById(id);
     if (!existingProject) return res.status(404).json({ message: "Project not found" });
 
-    // Remove old image if a new one is provided
-    if (image && existingProject.image) {
-      const oldImagePath = path.join(__dirname, '..', existingProject.image);
-      if (fs.existsSync(oldImagePath)) {
-        fs.unlinkSync(oldImagePath); // Delete the old image file
+    // Remove old image from Cloudinary if a new one is provided
+    if (req.file) {
+      // Delete the old image from Cloudinary
+      if (existingProject.image) {
+        const publicId = existingProject.image.split('/').pop().split('.')[0]; // Extract public ID from the image URL
+        await cloudinary.uploader.destroy(publicId); // Destroy old image from Cloudinary
       }
+
+      // Upload the new image to Cloudinary
+      const result = await cloudinary.uploader.upload(req.file.path);
+      image = result.secure_url; // Get the secure URL of the new image
     }
 
     // Prepare updated data
-    const updatedData = { name, projectLink,type };
+    const updatedData = { name, projectLink, type };
     if (image) updatedData.image = image;
 
     // Update the project
@@ -63,22 +83,16 @@ exports.deleteProject = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Find the project to get the image path
+    // Find the project to get the image URL
     const projectToDelete = await Project.findById(id);
     if (!projectToDelete) {
       return res.status(404).json({ message: "Project not found" });
     }
 
-    // Remove the associated image file if it exists
+    // Remove the image from Cloudinary if it exists
     if (projectToDelete.image) {
-      const filePath = path.resolve(projectToDelete.image); // Get the absolute file path
-      fs.unlink(filePath, (err) => {
-        if (err) {
-          console.error(`Error deleting image file: ${err.message}`);
-        } else {
-          console.log(`Deleted image file: ${filePath}`);
-        }
-      });
+      const publicId = projectToDelete.image.split('/').pop().split('.')[0]; // Extract public ID
+      await cloudinary.uploader.destroy(publicId); // Destroy image from Cloudinary
     }
 
     // Delete the project from the database

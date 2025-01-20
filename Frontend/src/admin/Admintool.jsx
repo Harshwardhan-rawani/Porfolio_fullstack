@@ -9,12 +9,13 @@ function Admintool() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     toolName: '',
-    image: null,
+    imageBase64: null, 
   });
-  const [tools, setTools] = useState([]);
-  const [editId, setEditId] = useState(null); // Track ID for editing
-  const fileInputRef = useRef(null); // Ref for file input
 
+  const [tools, setTools] = useState([]);
+  const [editId, setEditId] = useState(null); 
+  const fileInputRef = useRef(null); 
+ 
   // Fetch tools from the backend
   useEffect(() => {
     const fetchTools = async () => {
@@ -37,20 +38,23 @@ function Admintool() {
     });
   };
 
-  // Handle image change
-  const handleImageChange = (e) => {
-    setFormData({
-      ...formData,
-      image: e.target.files[0],
-    });
+  // Handle image file selection and convert to Base64
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setFormData({
+          ...formData,
+          imageBase64: reader.result,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
-  // Handle form submission (Add or Update tool)
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formToSend = new FormData();
-    formToSend.append('toolName', formData.toolName);
-    if (formData.image) formToSend.append('image', formData.image);
 
     try {
       setLoading(true);
@@ -58,8 +62,7 @@ function Admintool() {
         // Update existing tool
         const response = await axios.put(
           `${import.meta.env.VITE_URL}/api/tools/${editId}`,
-          formToSend,
-          { headers: { 'Content-Type': 'multipart/form-data' } }
+          formData,
         );
 
         setTools(tools.map(tool => (tool._id === editId ? response.data : tool)));
@@ -68,20 +71,19 @@ function Admintool() {
       } else {
         const response = await axios.post(
           `${import.meta.env.VITE_URL}/api/tools`,
-          formToSend,
-          { headers: { 'Content-Type': 'multipart/form-data' } }
+          formData,
         );
         toast.success("Added Successfully");
         setTools([...tools, response.data]);
       }
 
-      // Reset form
-      setFormData({ toolName: '', image: null });
+      setFormData({ toolName: '', imageBase64: null }); // Changed image to imageBase64
       if (fileInputRef.current) {
         fileInputRef.current.value = ''; // Reset file input
       }
     } catch (error) {
       console.error('Error submitting form:', error);
+      toast.error('Error processing request');
     } finally {
       setLoading(false);
     }
@@ -90,7 +92,7 @@ function Admintool() {
   // Handle Edit Tool
   const handleEdit = (id) => {
     const toolToEdit = tools.find(tool => tool._id === id);
-    setFormData({ toolName: toolToEdit.toolName, image: null });
+    setFormData({ toolName: toolToEdit.toolName, imageBase64: null }); // Changed image to imageBase64
     setEditId(id);
     if (fileInputRef.current) {
       fileInputRef.current.value = ''; // Reset file input
@@ -105,6 +107,7 @@ function Admintool() {
       setTools(tools.filter(tool => tool._id !== id));
     } catch (error) {
       console.error('Error deleting tool:', error);
+      toast.error('Error deleting tool');
     }
   };
 
@@ -147,10 +150,10 @@ function Admintool() {
                   className="block w-full text-sm text-gray-900 border-b-2 border-gray-300 cursor-pointer focus:outline-none focus:border-teal-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                 />
                 {/* Optional Image Preview */}
-                {formData.image && (
+                {formData.imageBase64 && (
                   <div className="mt-2">
                     <img
-                      src={URL.createObjectURL(formData.image)}
+                      src={formData.imageBase64}
                       alt="Preview"
                       className="w-32 h-32 object-cover rounded-md"
                     />
@@ -198,9 +201,9 @@ function Admintool() {
                   >
                     {/* Image */}
                     <td className="px-6 py-4">
-                      {tool.image && (
+                      {tool.image && ( 
                         <img
-                          src={`${import.meta.env.VITE_URL}/${tool.image}`} // Adjust the path if needed
+                          src={tool.image}
                           alt={tool.toolName}
                           className="lg:w-16 lg:h-16 md:w-14 md:h-14 w-10 h-10 rounded-md object-cover" // Styling for the image
                         />
@@ -232,6 +235,7 @@ function Admintool() {
           </div>
         </div>
       </div>
+      <ToastContainer />
     </>
   );
 }
