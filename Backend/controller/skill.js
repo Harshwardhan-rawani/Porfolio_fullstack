@@ -1,14 +1,27 @@
 const Skill = require("../model/skill");
-const fs = require('fs');
-const path = require('path');
+const cloudinary = require("cloudinary").v2;
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+});
 
 // Add a new skill
 exports.addSkill = async (req, res) => {
   try {
     const { skill, percentage } = req.body;
-    const image = req.file ? req.file.path : null;
+   console.log(req.file.path)
+    let imageUrl = null;
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "skills",
+      });
+      imageUrl = result.secure_url;
+    }
 
-    const newSkill = new Skill({ skill, percentage, image });
+    const newSkill = new Skill({ skill, percentage, image: imageUrl });
     await newSkill.save();
     res.status(200).json(newSkill);
   } catch (error) {
@@ -26,65 +39,63 @@ exports.getSkills = async (req, res) => {
   }
 };
 
+// Update a skill
 exports.updateSkill = async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { skill, percentage } = req.body;
-      const image = req.file ? req.file.path : null;
-  
-      // Find the existing skill
-      const existingSkill = await Skill.findById(id);
-      if (!existingSkill) return res.status(404).json({ message: "Skill not found" });
-  
-      // Remove old image if a new one is provided
-      if (image && existingSkill.image) {
-        const oldImagePath = path.join(__dirname, '..', existingSkill.image);
-        if (fs.existsSync(oldImagePath)) {
-          fs.unlinkSync(oldImagePath); // Delete the old image file
-        }
+  try {
+    const { id } = req.params;
+    const { skill, percentage } = req.body;
+
+    // Find the existing skill
+    const existingSkill = await Skill.findById(id);
+    if (!existingSkill) return res.status(404).json({ message: "Skill not found" });
+
+    let imageUrl = existingSkill.image;
+    if (req.file) {
+      // Remove the old image from Cloudinary if it exists
+      if (existingSkill.image) {
+        const publicId = existingSkill.image.split("/").pop().split(".")[0];
+        await cloudinary.uploader.destroy(`skills/${publicId}`);
       }
-  
-      // Prepare updated data
-      const updatedData = { skill, percentage };
-      if (image) updatedData.image = image;
-  
-      // Update the skill
-      const updatedSkill = await Skill.findByIdAndUpdate(id, updatedData, { new: true });
-  
-      res.status(200).json(updatedSkill);
-    } catch (error) {
-      res.status(500).json({ message: "Error updating skill", error });
+
+      // Upload the new image to Cloudinary
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "skills",
+      });
+      imageUrl = result.secure_url;
     }
-  };
+
+    // Update the skill
+    const updatedData = { skill, percentage, image: imageUrl };
+    const updatedSkill = await Skill.findByIdAndUpdate(id, updatedData, { new: true });
+
+    res.status(200).json(updatedSkill);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating skill", error });
+  }
+};
 
 // Delete a skill
 exports.deleteSkill = async (req, res) => {
-    try {
-      const { id } = req.params;
-  
-      // Find the skill to get the image path
-      const skillToDelete = await Skill.findById(id);
-      if (!skillToDelete) {
-        return res.status(404).json({ message: "Skill not found" });
-      }
-  
-      // Remove the associated image file if it exists
-      if (skillToDelete.image) {
-        const filePath = path.resolve(skillToDelete.image); // Get the absolute file path
-        fs.unlink(filePath, (err) => {
-          if (err) {
-            console.error(`Error deleting image file: ${err.message}`);
-          } else {
-            console.log(`Deleted image file: ${filePath}`);
-          }
-        });
-      }
-  
-      // Delete the skill from the database
-      await Skill.findByIdAndDelete(id);
-  
-      res.status(200).json({ message: "Skill deleted successfully" });
-    } catch (error) {
-      res.status(500).json({ message: "Error deleting skill", error });
+  try {
+    const { id } = req.params;
+
+    // Find the skill to get the image path
+    const skillToDelete = await Skill.findById(id);
+    if (!skillToDelete) {
+      return res.status(404).json({ message: "Skill not found" });
     }
-  };
+
+    // Remove the image from Cloudinary
+    if (skillToDelete.image) {
+      const publicId = skillToDelete.image.split("/").pop().split(".")[0];
+      await cloudinary.uploader.destroy(`skills/${publicId}`);
+    }
+
+    // Delete the skill from the database
+    await Skill.findByIdAndDelete(id);
+
+    res.status(200).json({ message: "Skill deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting skill", error });
+  }
+};

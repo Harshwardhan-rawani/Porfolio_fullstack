@@ -39,12 +39,16 @@ function Adminskill() {
 
   // Handle image change
   const handleImageChange = (e) => {
-    setFormData({
-      ...formData,
-      image: e.target.files[0],
-    });
+    const file = e.target.files[0];
+    if (file) {
+      const previewURL = URL.createObjectURL(file); 
+      setFormData({
+        ...formData,
+        image: file,
+        imagePreview: previewURL, 
+      });
+    }
   };
-
   // Handle form submission (Add or Update skill)
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -165,10 +169,10 @@ function Adminskill() {
     className="block w-full text-sm text-gray-900 border-b-2 border-gray-300  cursor-pointer focus:outline-none  focus:border-teal-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
   />
   {/* Optional Image Preview */}
-  {formData.image && (
+  {formData.imagePreview && (
     <div className="mt-2">
       <img 
-        src={URL.createObjectURL(formData.image)} 
+        src={formData.imagePreview} 
         alt="Preview" 
         className="w-32 h-32 object-cover rounded-md"
       />
@@ -218,7 +222,7 @@ function Adminskill() {
       <td className="px-6 py-4">
       {skill.image && (
         <img
-          src={`${import.meta.env.VITE_URL}/${skill.image}`} // Adjust the path if needed
+          src={skill.image}// Adjust the path if needed
           alt={skill.skill}
           className="lg:w-16 lg:h-16 md:w-14 md:h-14 w-10 h-10 rounded-md object-cover" // Styling for the image
         />

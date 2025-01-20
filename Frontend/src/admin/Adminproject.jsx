@@ -50,7 +50,7 @@ function Adminproject() {
     }
   };
   
-  console.log(formData)
+
 
  
   const handleSubmit = async (e) => {

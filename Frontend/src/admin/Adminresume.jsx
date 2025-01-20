@@ -154,7 +154,17 @@ function Adminresume() {
                   className="block w-full text-sm text-gray-900 border-b-2 border-gray-300 cursor-pointer focus:outline-none  focus:border-teal-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                 />
               </div>
-
+          <div>
+          {formData.imageBase64 && (
+    <div className="mt-2">
+      <img 
+        src={formData.imageBase64} 
+        alt="Preview" 
+        className="w-32 h-32 object-cover rounded-md"
+      />
+    </div>
+  )}
+          </div>
               {/* Submit Button */}
               <div className="flex justify-center">
                 {loading ? (
@@ -197,7 +207,7 @@ function Adminresume() {
                     {/* Resume Link */}
                     <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white">
                       <a
-                        href={`${import.meta.env.VITE_URL}/${resume.resume}`}
+                        href={resume.resume}
                         className="text-blue-500"
                         target="_blank"
                         rel="noopener noreferrer"
