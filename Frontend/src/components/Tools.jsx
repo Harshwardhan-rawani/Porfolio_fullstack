@@ -55,7 +55,7 @@ function Tools() {
               className="flex justify-center animate_r"
             >
               <img
-                src={`${import.meta.env.VITE_URL}/${tool.image}`} // Assuming each tool has an `image` property.
+                src={tool.image}// Assuming each tool has an `image` property.
                 alt={tool.name || `Tool ${index + 1}`}
                 className="xl:w-24 lg:w-22 md:w-20 w-16"
               />

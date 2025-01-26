@@ -47,7 +47,7 @@ function Progressbar({value,text,icon}) {
            // Customize the icon color
         }}
       >
-     <img src={`${import.meta.env.VITE_URL}/${icon}`} alt="" className='lg:w-16 w-12'/>
+     <img src={icon} alt="" className='lg:w-16 w-12'/>
   
       </div>
     

@@ -56,7 +56,7 @@ function Project() {
                 >
                   <div className='m-2.5 overflow-hidden rounded-md h-52 flex justify-center items-center'>
                     <img 
-                      src={`${import.meta.env.VITE_URL}/${project.image}`} 
+                      src={project.image} 
                       className='w-full h-full object-cover' 
                       alt={project.name} 
                     />

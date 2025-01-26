@@ -9,7 +9,7 @@ cloudinary.config({
 
 // Add a new tool
 exports.addTool = async (req, res) => {
- console.log(req.body)
+
   try {
     const { toolName, imageBase64 } = req.body;
 
