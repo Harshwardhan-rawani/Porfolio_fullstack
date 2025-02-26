@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Progressbar from "./Progressbar";
 import { motion } from "framer-motion";
 import axios from "axios";
-
+import Loading from "react-loading";
 function Skill() {
   const [skills, setSkills] = useState([]);
   // Fetch skills from the backend
@@ -66,10 +66,14 @@ function Skill() {
             ))
           ) : (
             <div className="col-span-full text-center text-gray-500">
-              {skills.length === 0
-                ? "No skills available at the moment."
-                : "Error loading skills. Please try again later."}
-            </div>
+      {skills.length === 0 ? (
+        <div className="flex flex-col items-center justify-center">
+          <Loading type="spin" color="#6b7280" height={30} width={30} />
+        </div>
+      ) : (
+        "Error loading skills. Please try again later."
+      )}
+    </div>
           )}
         </div>
       </div>

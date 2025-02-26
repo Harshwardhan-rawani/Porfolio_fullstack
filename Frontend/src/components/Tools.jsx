@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import "./css/Tools.css";
 import axios from "axios";
-
+import Loading from "react-loading";
 function Tools() {
   const [tools, setTools] = useState([]);
 
@@ -63,10 +63,15 @@ function Tools() {
           ))
         ) : (
           <div className="col-span-full text-center text-gray-500">
-            {tools.length === 0
-              ? "No tools available."
-              : "Error fetching tools. Please try again later."}
-          </div>
+          {tools.length === 0 ? (
+            <div className="flex flex-col items-center justify-center">
+              <Loading type="spin" color="#6b7280" height={30} width={30} />
+              
+            </div>
+          ) : (
+            "Error fetching tools. Please try again later."
+          )}
+        </div>
         )}
       </div>
     </div>
