@@ -65,7 +65,7 @@ function Tools() {
           <div className="col-span-full text-center text-gray-500">
           {tools.length === 0 ? (
             <div className="flex flex-col items-center justify-center">
-              <Loading type="spin" color="#6b7280" height={30} width={30} />
+              <Loading type="spin" color="#CBA35C" height={30} width={30} />
               
             </div>
           ) : (
