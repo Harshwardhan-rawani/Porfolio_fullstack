@@ -21,6 +21,7 @@ import Adminproject from './admin/Adminproject';
 import Adminabout from './admin/Adminabout';
 import Adminlogin from './admin/Adminlogin';
 import PrivateRoute from './admin/PrivateRoute';
+import Card from './components/Card';
 
 function App() {
   const isAuthenticated = !!localStorage.getItem("token");
@@ -68,6 +69,7 @@ function App() {
           </>
         } />
         <Route path="/admin" element={<Adminlogin />} />
+        <Route path="/card" element={<Card />} />
 
         {/* Protected Admin Routes */}
         <Route path="/admin/*" element={<PrivateRoute isAuthenticated={isAuthenticated} />}>
